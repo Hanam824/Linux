@@ -1,0 +1,30 @@
+# The basics:
+# 1. make sure the virtual machine settings in your bios are enabled (VT-x, AMD-V, SVM or Vanderpool. Enable Intel VT-d or AMD IOMMU if the options are available)
+# 2. Install WSL 2 and Ubuntu 22.04 (e.g. here up to step 4: https://ubuntu.com/tutorials/install-ubuntu-on-wsl2-on-windows-11-with-gui-support)
+#
+# Thanks to the user blakeduffey the process got quite easy. Big kudos for that!!
+# See the original thread here: https://github.com/microsoft/WSL/discussions/9350#discussioncomment-7492570
+
+# 1. install and configure xrdp (and hold acpid since it kills the install)
+sudo apt-mark hold acpid acpi-support
+sudo apt update && sudo apt upgrade -y
+sudo apt -y install xrdp
+sudo cp /etc/xrdp/xrdp.ini /etc/xrdp/xrdp.ini.bak
+sudo sed -i 's/3389/3390/g' /etc/xrdp/xrdp.ini
+sudo sed -i 's/max_bpp=32/#max_bpp=32\nmax_bpp=128/g' /etc/xrdp/xrdp.ini
+sudo sed -i 's/xserverbpp=24/#xserverbpp=24\nxserverbpp=128/g' /etc/xrdp/xrdp.ini
+
+# 2. Then create ~/.xsessionrc with the following contents:
+export GNOME_SHELL_SESSION_MODE=ubuntu
+export XDG_CURRENT_DESKTOP=ubuntu:GNOME
+export XDG_DATA_DIRS=/usr/share/ubuntu:/usr/local/share:/usr/share:/var/lib/snapd/desktop
+export WAYLAND_DISPLAY=
+export XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu:/etc/xdg
+
+# 3. Finally, install the GNOME deskop and xrdp
+sudo apt install -y ubuntu-desktop-minimal # or ubuntu-desktop
+sudo systemctl restart xrdp
+
+# Connect via the standard Windows Remote Desktop client to localhost:3390
+# This will provide a pretty good desktop environment, including multi-monitor support.
+# In case you need different environments please see the original thread, blakeduffey tested and described some.
